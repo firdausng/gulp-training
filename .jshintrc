@@ -56,5 +56,6 @@
 
     "globals": {
         "angular": false
-    }
+    },
+    "esversion": 6
 }
