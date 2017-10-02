@@ -1,15 +1,9 @@
 var gulp = require('gulp');
+var del = require('del');
 var config = require('./gulp.config')();
 var args = require('yargs').argv;
 
 var $ = require('gulp-load-plugins')({ lazy: true });
-
-// var jshint = require('gulp-jshint');
-// var jscs = require('gulp-jscs');
-// var util = require('gulp-util');
-// var gulpprint = require('gulp-print');
-// var gulpif = require('gulp-if');
-
 
 gulp.task('vet', () => {
     log('Analyzing source with JSHint and JSCS');
@@ -22,6 +16,35 @@ gulp.task('vet', () => {
         ;
 });
 
+gulp.task('styles', ['clean-styles'], function () {
+    log('Compiling less to css');
+    return gulp
+        .src(config.less)
+        .pipe($.plumber())
+        .pipe($.less())
+        .pipe($.autoprefixer({ browsers: ['last 2 version', '> 5%'] }))
+        .pipe(gulp.dest(config.temp))
+})
+
+gulp.task('clean-styles', function () {
+    var files = config.temp + '**/*.css';
+    return clean(files);
+})
+
+gulp.task('less-watcher', function () {
+    return gulp
+        .watch([config.less], ['styles']);
+})
+
+/**
+ * helper functions
+ */
+
+function clean(path) {
+    log('Cleaning: ' + $.util.colors.blue(path));
+    return del(path)
+        .catch(error => log('Error While Cleaning: ' + $.util.colors.red(error)));
+}
 
 function log(msg) {
     if (typeof (msg) === 'object') {
